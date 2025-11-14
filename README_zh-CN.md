@@ -2,6 +2,8 @@
 
 ASP.net ViewState密钥被动扫描爆破BurpSuite插件。 
 
+[English](./README.md) | 简体中文
+
 # 下载
 
 预编译包：[Releases](https://github.com/whwlsfb/ViewState-Cracker/releases)

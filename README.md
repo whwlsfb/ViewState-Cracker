@@ -2,6 +2,8 @@
 
 A BurpSuite extension for passive scanning and brute-forcing ASP.NET ViewState keys.
 
+English | [简体中文](./README_zh-CN.md)
+
 # Download
 
 Precompiled package: [Releases](https://github.com/whwlsfb/ViewState-Cracker/releases)
