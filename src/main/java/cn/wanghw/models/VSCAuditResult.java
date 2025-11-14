@@ -8,6 +8,7 @@ import java.util.List;
 
 public class VSCAuditResult implements AuditResult {
     private List<AuditIssue> auditIssues = new ArrayList<>();
+    private ViewStateData viewStateData;
 
     @Override
     public List<AuditIssue> auditIssues() {
@@ -16,5 +17,13 @@ public class VSCAuditResult implements AuditResult {
 
     public void addAuditIssue(AuditIssue auditIssue) {
         auditIssues.add(auditIssue);
+    }
+
+    public ViewStateData getViewStateData() {
+        return viewStateData;
+    }
+
+    public void setViewStateData(ViewStateData viewStateData) {
+        this.viewStateData = viewStateData;
     }
 }

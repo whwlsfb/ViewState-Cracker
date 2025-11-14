@@ -46,6 +46,7 @@ public class ViewStateScanner implements ScanCheck {
         VSCAuditResult result = new VSCAuditResult();
         ViewStateData viewStateData = parseViewState(httpRequestResponse);
         if (viewStateData != null) {
+            result.setViewStateData(viewStateData);
             viewStateData.setPath(httpRequestResponse.request().pathWithoutQuery());
             String hostAndPort = String.format("%s:%s", httpRequestResponse.httpService().host(), httpRequestResponse.httpService().port());
             if (!isScanned(hostAndPort)) {
