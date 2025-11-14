@@ -1,33 +1,34 @@
 # ViewState-Cracker
 
-ASP.net ViewState密钥被动扫描爆破BurpSuite插件。 
+A BurpSuite extension for passive scanning and brute-forcing ASP.NET ViewState keys.
 
-# 下载
+# Download
 
-预编译包：[Releases](https://github.com/whwlsfb/ViewState-Cracker/releases)
+Precompiled package: [Releases](https://github.com/whwlsfb/ViewState-Cracker/releases)
 
-# 编译
-需要Maven、JDK 17。
+# Compilation
+
+Requires Maven and JDK 17.
 
 ```
 $ mvn package
 ```
 
-# 使用
+# Usage
 
-将`machineKeys.txt`下载并放置于插件JAR的相同目录下，然后使用BurpSuite（建议版本大于2024.10）安装插件即可启用。
+Download `machineKeys.txt` and place it in the same directory as the plugin JAR. Then, install the plugin in BurpSuite (recommended version 2024.10 or later) to enable it.
 
-插件将自动提取请求、响应流量中的ViewState相关数据，在发现无签名或者密钥爆破成功的ViewState后，将会自动生成一个BurpSuite的Issue条目。
+The plugin will automatically extract ViewState-related data from request and response traffic. When it detects an unsigned ViewState or successfully brute-forces a key, it will automatically generate a BurpSuite issue entry.
 
-扫描、爆破过程中将不会产生请求。
+No requests will be generated during the scanning and brute-forcing process.
 
+# Acknowledgments
 
-# 鸣谢
-插件中部分代码与灵感借鉴于以下项目
+Partial code and inspiration for this plugin are derived from the following projects:
 
 - https://github.com/yuvadm/viewstate
 - https://github.com/0xacb/viewgen
 
-MachineKey字典来源于以下项目
+The MachineKey dictionary is sourced from:
 
 - https://github.com/NotSoSecure/Blacklist3r
