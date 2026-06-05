@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class ViewStateScanner implements ScanCheck {
     private final ViewStateExtractor viewStateExtractor;
     private final ConcurrentSkipListSet<Object> scannedHosts = new ConcurrentSkipListSet<>();
+    private static volatile boolean passiveScanEnabled = true;
+    private static volatile boolean skipDuplicateHosts = true;
+    private static volatile boolean bruteForceEnabled = true;
 
     public ViewStateScanner() {
         viewStateExtractor = new ViewStateExtractor();
@@ -25,12 +28,47 @@ public class ViewStateScanner implements ScanCheck {
 
     @Override
     public AuditResult activeAudit(HttpRequestResponse httpRequestResponse, AuditInsertionPoint auditInsertionPoint) {
-        return startScan(httpRequestResponse, true);
+        return startScan(httpRequestResponse, false);
     }
 
     @Override
     public AuditResult passiveAudit(HttpRequestResponse httpRequestResponse) {
+        if (!passiveScanEnabled) {
+            return new VSCAuditResult();
+        }
         return startScan(httpRequestResponse, false);
+    }
+
+    public VSCAuditResult manualAudit(HttpRequestResponse httpRequestResponse) {
+        return startScan(httpRequestResponse, true);
+    }
+
+    public void clearScannedHosts() {
+        scannedHosts.clear();
+    }
+
+    public static boolean isPassiveScanEnabled() {
+        return passiveScanEnabled;
+    }
+
+    public static void setPassiveScanEnabled(boolean enabled) {
+        passiveScanEnabled = enabled;
+    }
+
+    public static boolean isSkipDuplicateHosts() {
+        return skipDuplicateHosts;
+    }
+
+    public static void setSkipDuplicateHosts(boolean enabled) {
+        skipDuplicateHosts = enabled;
+    }
+
+    public static boolean isBruteForceEnabled() {
+        return bruteForceEnabled;
+    }
+
+    public static void setBruteForceEnabled(boolean enabled) {
+        bruteForceEnabled = enabled;
     }
 
     private boolean isScanned(Object host) {
@@ -42,17 +80,17 @@ public class ViewStateScanner implements ScanCheck {
         }
     }
 
-    private AuditResult startScan(HttpRequestResponse httpRequestResponse, boolean active) {
+    private VSCAuditResult startScan(HttpRequestResponse httpRequestResponse, boolean forceScan) {
         VSCAuditResult result = new VSCAuditResult();
         ViewStateData viewStateData = parseViewState(httpRequestResponse);
         if (viewStateData != null) {
             result.setViewStateData(viewStateData);
             viewStateData.setPath(httpRequestResponse.request().pathWithoutQuery());
             String hostAndPort = String.format("%s:%s", httpRequestResponse.httpService().host(), httpRequestResponse.httpService().port());
-            if (!isScanned(hostAndPort)) {
+            if (forceScan || !skipDuplicateHosts || !isScanned(hostAndPort)) {
                 if (ViewStateParser.isWithoutMACViewState(viewStateData.getViewState())) {
                     result.addAuditIssue(new ViewStateWithoutMacIssue(httpRequestResponse.httpService(), httpRequestResponse));
-                } else {
+                } else if (bruteForceEnabled) {
                     BruteResult bruteResult = ViewStateUtil.bruteViewStateKey(viewStateData);
                     if (bruteResult.isSuccess()) {
                         result.addAuditIssue(new ViewStateKeyFoundIssue(httpRequestResponse.httpService(), httpRequestResponse, bruteResult));
@@ -65,7 +103,7 @@ public class ViewStateScanner implements ScanCheck {
 
     private ViewStateData parseViewState(HttpRequestResponse httpRequestResponse) {
         ViewStateData viewStateData = viewStateExtractor.parseRequest(httpRequestResponse.request());
-        if (viewStateData == null)
+        if (viewStateData == null && httpRequestResponse.hasResponse())
             viewStateData = viewStateExtractor.parseResponse(httpRequestResponse.response());
         return viewStateData;
     }
